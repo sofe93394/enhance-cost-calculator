@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>20강 장비 제작 원가 계산기 (URL 공유)</title>
+  <style>
+    body {font-family: Arial, sans-serif;background:#0f0f0f;color:#eee;display:flex;justify-content:center;padding:40px;}
+    .container {width:600px;background:#1c1c1c;border-radius:14px;padding:26px;box-shadow:0 0 25px rgba(0,0,0,0.6);}
+    h1 {font-size:20px;text-align:center;margin-bottom:20px;}
+    label {margin-top:12px;display:block;font-size:14px;}
+    input {width:100%;padding:8px;margin-top:6px;border-radius:6px;border:none;font-size:14px;}
+    .row {display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    button {width:100%;margin-top:22px;padding:13px;background:#ff5722;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;}
+    .result {margin-top:22px;padding:16px;background:#222;border-radius:10px;font-size:14px;line-height:1.6;}
+    .share {margin-top:12px;font-size:12px;word-break:break-all;color:#aaa;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>💰 20강 장비 제작 원가 계산기</h1>
+
+  <label>① 베이스 장비 구매가 (억)</label>
+  <input type="number" id="base" />
+
+  <label>② 재료별 비용 입력 (억)</label>
+  <div class="row">
+    <input id="weak" type="number" placeholder="미약한 파편" />
+    <input id="frag" type="number" placeholder="파편" />
+    <input id="cond" type="number" placeholder="농축된 파편" />
+    <input id="book" type="number" placeholder="생활장비 연성서" />
+    <input id="rare" type="number" placeholder="희귀 가루" />
+    <input id="hero" type="number" placeholder="영웅 가루" />
+    <input id="legend" type="number" placeholder="전설 가루" />
+  </div>
+
+  <button onclick="calculate()">20강 제작 원가 계산</button>
+
+  <div class="result" id="result">값을 입력하면 결과가 표시됩니다.</div>
+  <div class="share" id="share"></div>
+</div>
+
+<script>
+const ANNUAL_RETURN = 0.10; // 10%
+const MONTHS = 2; // 강화 기간
+
+const ids = ['base','weak','frag','cond','book','rare','hero','legend'];
+
+function calculate() {
+  let totalMat = 0;
+  ids.slice(1).forEach(id => totalMat += Number(document.getElementById(id).value)||0);
+  const base = Number(document.getElementById('base').value)||0;
+  const invested = base + totalMat;
+  const opp = invested * ANNUAL_RETURN * (MONTHS/12);
+  const total = invested + opp;
+
+  document.getElementById('result').innerHTML =
+    `재료 총 비용: ${totalMat.toFixed(1)}억<br>`+
+    `투입 자본: ${invested.toFixed(1)}억<br>`+
+    `기회비용(연10%,2개월): ${opp.toFixed(1)}억<br><br>`+
+    `<b>20강 장비 실제 제작 원가: ${total.toFixed(1)}억</b>`;
+
+  updateURL();
+}
+
+function updateURL() {
+  const params = new URLSearchParams();
+  ids.forEach(id => {
+    const v = document.getElementById(id).value;
+    if (v) params.set(id, v);
+  });
+  const url = location.origin + location.pathname + '?' + params.toString();
+  document.getElementById('share').innerText = '공유 URL: ' + url;
+  history.replaceState(null, '', url);
+}
+
+function loadFromURL() {
+  const p = new URLSearchParams(location.search);
+  ids.forEach(id => {
+    if (p.has(id)) document.getElementById(id).value = p.get(id);
+  });
+  if (p.toString()) calculate();
+}
+
+loadFromURL();
+</script>
+</body>
+</html>
